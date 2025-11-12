@@ -8,6 +8,7 @@ import settings_logo from "../assets/function-process.png"
 import { NavLink } from "react-router-dom";
 
 const Sidebar = () => {
+  
   const menuItems = [
     { title: "Dashboard", icon:dashboard_logo, path: "/" },
     { title: "Users",icon:users_logo, path: "/users" },

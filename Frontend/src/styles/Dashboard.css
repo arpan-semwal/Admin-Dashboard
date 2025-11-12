@@ -1,4 +1,40 @@
- .dashboard{
-    background-color: blue;
-   
+ .top-cards{
+   display: grid;
+   grid-template-columns: repeat(auto-fit , minmax(220px , 1fr));
+   gap: 20px;
+ }
+
+
+ .chart-section{
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin-top: 20px;
+ }
+
+
+ .revenue-chart{
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 20px;
+ }
+
+
+ @media (max-width:768px) {
+  .main-content{
+    padding: 10px;
+  }
+
+  .chart-section,
+  .revenue-chart{
+    padding: 15px;
+  }
+
+  .top-cards{
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
  }
