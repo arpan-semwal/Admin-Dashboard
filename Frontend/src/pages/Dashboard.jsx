@@ -1,71 +1,89 @@
 import React from "react";
 import "../styles/Dashboard.css";
-import Cards from "../components/Cards";
-import dashboard_logo from "../assets/dashboard-monitor.png";
-import users_logo from "../assets/circle-user.png";
-import orders_logo from "../assets/order-history.png";
-import settings_logo from "../assets/function-process.png";
+
+// Chart component for revenue visualization
 import RevenueChart from "../components/RevenueChart";
 
-const metrics = [
-  {
-    icon: users_logo,
-    title: "Total Users",
-    value: 1245,
-    subtext: "+12 new today",
-  },
-  {
-    icon: orders_logo,
-    title: "Total Orders",
-    value: 552,
-    subtext: "3 pendings",
-  },
-  {
-    icon: settings_logo,
-    title: "Revenue",
-    value: "$1,20,540",
-    subtext: "5% last week",
-  },
-  {
-    icon: dashboard_logo,
-    title: "Pending Request",
-    value: 14,
-    subtext: "Needs attention",
-  },
-];
+// React Query imports for data fetching and caching
+import { useQuery } from "@tanstack/react-query";
+
+// API functions to fetch users, products, and orders data
+import { fetchUsers } from "../api/users";
+import { fetchProducts } from "../api/products";
+import { fetchOrders } from "../api/orders";
+
+// Reusable component to display top-level statistics in card format
+import CardsSection from "../components/CardsSection";
 
 function Dashboard() {
+  /**
+   * Fetch all required data using React Query.
+   * Each query is cached and automatically updated when dependencies change.
+   */
+
+  // Fetch Users Data
+  const { data: users, isLoading: loadingUsers } = useQuery({
+    queryKey: ["users"], // Unique key for caching
+    queryFn: fetchUsers, // API function to call
+  });
+
+  // Fetch Products Data
+  const { data: products, isLoading: loadingProducts } = useQuery({
+    queryKey: ["products"],
+    queryFn: fetchProducts,
+  });
+
+  // Fetch Orders Data
+  const { data: orders, isLoading: loadingOrders } = useQuery({
+    queryKey: ["orders"],
+    queryFn: fetchOrders,
+  });
+
+  /**
+   * If any of the API requests are still loading,
+   * show a loading indicator to the user.
+   */
+  if (loadingUsers || loadingProducts || loadingOrders)
+    return <div>Loading.....</div>;
+
+  /**
+   * Prepare summarized statistics for dashboard cards.
+   * - Total Users: Number of user entries
+   * - Total Products: Number of products
+   * - Total Orders: Number of orders
+   * - Revenue: Sum of all order totals
+   */
+  const stats = [
+    {
+      title: "Total Users",
+      value: users?.total || users?.users?.length || 0, // Fallback for different API structures
+    },
+    {
+      title: "Total Products",
+      value: products?.total || products?.products?.length || 0,
+    },
+    {
+      title: "Total Orders",
+      value: orders?.total || orders?.orders?.length || 0,
+    },
+    {
+      title: "Revenue",
+      // Calculate total revenue from all orders
+      value: "$" + (orders?.carts?.reduce((acc, c) => acc + c.total, 0) || 0),
+    },
+  ];
+
   return (
     <div className="dashboard">
-      {/* {Cards Section - Summary Stats} */}
-      <div className="top-cards">
-        {metrics.map((item) => (
-          <Cards
-            key={item.title}
-            icon={item.icon}
-            title={item.title}
-            value={item.value}
-            subtext={item.subtext}
-          />
-        ))}
-      </div>
+      {/* ===== Top Summary Section ===== */}
+      {/* Displays overall metrics like total users, products, orders, and revenue */}
+      <CardsSection stats={stats} />
 
-        {/* Charts Section - Graphs / Visuals */}
+      {/* ===== Charts Section ===== */}
+      {/* Contains all visual data representations (e.g., revenue trends) */}
       <div className="chart-section">
-    
-         <RevenueChart/>
-      
-       
+        <RevenueChart />
       </div>
-
-
-        {/* Table Section - Recent Activitites 
-      <div>
-        <h2>Recent Orders</h2>
-        <div>
-          Table of latest orders or users
-        </div>
-      </div> */}
     </div>
   );
 }
